@@ -26,7 +26,7 @@ export function getExecutableName() {
   if (process.platform === 'win32') {
     return `${getWindowsIdentifierName()}${suffix}`
   } else if (process.platform === 'linux') {
-    return `desktop-plus${suffix}`
+    return `desktop-plus-custom${suffix}`
   } else {
     return productName
   }

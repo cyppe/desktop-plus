@@ -1,10 +1,11 @@
 export type DiffTheme = 'default' | 'catppuccin'
 
-export const defaultDiffTheme: DiffTheme = 'default'
+export const standardDiffTheme: DiffTheme = 'default'
 export const catppuccinDiffTheme: DiffTheme = 'catppuccin'
+export const defaultDiffTheme: DiffTheme = catppuccinDiffTheme
 
 export const availableDiffThemes: ReadonlyArray<DiffTheme> = [
-  defaultDiffTheme,
+  standardDiffTheme,
   catppuccinDiffTheme,
 ]
 

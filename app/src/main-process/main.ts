@@ -132,6 +132,7 @@ function getExtraErrorContext(): Record<string, string> {
 const protocolLauncherArg = '--protocol-launcher'
 
 const possibleProtocols = new Set(['x-github-client'])
+const registerDefaultProtocols = false
 if (__DEV_SECRETS__) {
   possibleProtocols.add('x-github-desktop-dev-auth')
 } else {
@@ -489,7 +490,12 @@ app.on('ready', () => {
 
   readyTime = now() - launchTime
 
-  possibleProtocols.forEach(protocol => setAsDefaultProtocolClient(protocol))
+  // The chezmoi-managed desktop entry owns protocol routing for this custom
+  // build. Keep accepting protocol URLs without rewriting the host's defaults
+  // from inside Electron.
+  if (registerDefaultProtocols) {
+    possibleProtocols.forEach(protocol => setAsDefaultProtocolClient(protocol))
+  }
 
   createWindow()
 
