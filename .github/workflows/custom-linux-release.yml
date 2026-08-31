@@ -1,0 +1,233 @@
+name: Custom - Build & Release Linux
+
+# Intentionally manual-only. The private-use fork must not spend Actions time
+# or publish binaries merely because a branch, tag, or pull request changed.
+on:
+  workflow_dispatch:
+    inputs:
+      release_suffix:
+        description: Optional tag suffix (default is this workflow run number)
+        required: false
+        type: string
+      release_notes:
+        description: Optional note appended to the generated release notes
+        required: false
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: desktop-plus-custom-linux-release
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    name: Prepare draft release
+    if: github.ref == 'refs/heads/custom/catppuccin-codemirror-6'
+    runs-on: ubuntu-24.04
+    outputs:
+      tag: ${{ steps.release.outputs.tag }}
+      version: ${{ steps.release.outputs.version }}
+
+    steps:
+      - name: Check out release metadata
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+          submodules: false
+
+      - name: Create empty draft release
+        id: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_SUFFIX_INPUT: ${{ inputs.release_suffix }}
+          EXTRA_RELEASE_NOTES: ${{ inputs.release_notes }}
+        run: |
+          set -euo pipefail
+          version=$(node -p "require('./app/package.json').version")
+          suffix=${RELEASE_SUFFIX_INPUT:-r${GITHUB_RUN_NUMBER}}
+          if [[ ! $suffix =~ ^[A-Za-z0-9._-]+$ ]]; then
+            echo "Invalid release suffix: $suffix" >&2
+            exit 1
+          fi
+
+          tag="custom-v${version}-${suffix}"
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release already exists: $tag" >&2
+            exit 1
+          fi
+
+          notes=$(mktemp)
+          {
+            echo "Desktop Plus Custom Linux build from commit \`$GITHUB_SHA\`."
+            echo
+            echo "Included private-use changes:"
+            echo "- selectable Catppuccin diff theme, enabled by default"
+            echo "- CodeMirror 6/Lezer diff highlighter"
+            echo "- patched Lezer PHP promoted-property attributes"
+            echo
+            echo "Artifacts:"
+            echo "- x86-64 AppImage for beefy"
+            echo "- ARM64 AppImage for omarchy-macbook"
+            echo "- SHA256SUMS for both binaries"
+            if [[ -n $EXTRA_RELEASE_NOTES ]]; then
+              echo
+              echo "$EXTRA_RELEASE_NOTES"
+            fi
+          } >"$notes"
+
+          gh release create "$tag" \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --title "Desktop Plus Custom ${version} (${suffix})" \
+            --notes-file "$notes" \
+            --draft
+          echo "tag=$tag" >>"$GITHUB_OUTPUT"
+          echo "version=$version" >>"$GITHUB_OUTPUT"
+
+  build:
+    name: Build Linux ${{ matrix.asset_arch }}
+    needs: prepare
+    if: github.ref == 'refs/heads/custom/catppuccin-codemirror-6'
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            build_arch: x64
+            asset_arch: x86_64
+            file_pattern: x86-64
+          - runner: ubuntu-24.04-arm
+            build_arch: arm64
+            asset_arch: arm64
+            file_pattern: ARM aarch64
+    env:
+      APP_VERSION: ${{ needs.prepare.outputs.version }}
+      RELEASE_CHANNEL: test
+
+    steps:
+      - name: Check out the selected custom commit
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+          submodules: recursive
+
+      - uses: ./.github/actions/setup-ci-environment
+        with:
+          node-version: 24.15.0
+          arch: ${{ matrix.build_arch }}
+
+      - name: Test custom diff behavior
+        if: matrix.build_arch == 'x64'
+        run: |
+          yarn test:setup
+          yarn test:unit \
+            app/test/unit/codemirror-6-highlighting-test.ts \
+            app/test/unit/diff-theme-test.ts
+
+      - name: Build production app
+        run: yarn build:prod
+        env:
+          npm_config_arch: ${{ matrix.build_arch }}
+          TARGET_ARCH: ${{ matrix.build_arch }}
+
+      - name: Package AppImage
+        run: |
+          ./node_modules/.bin/electron-builder build \
+            --prepackaged "dist/desktop-plus-custom-linux-${{ matrix.build_arch }}" \
+            --${{ matrix.build_arch }} \
+            --config script/electron-builder-linux.yml \
+            --publish never
+        env:
+          npm_config_arch: ${{ matrix.build_arch }}
+          TARGET_ARCH: ${{ matrix.build_arch }}
+
+      - name: Verify and name artifact
+        id: artifact
+        env:
+          ASSET_ARCH: ${{ matrix.asset_arch }}
+          BUILD_ARCH: ${{ matrix.build_arch }}
+          FILE_PATTERN: ${{ matrix.file_pattern }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          set -euo pipefail
+          source_image=$(find dist -maxdepth 1 -type f \
+            -name "DesktopPlus-linux-${ASSET_ARCH}-*.AppImage" -print -quit)
+          test -n "$source_image"
+          file "$source_image" | grep -F "$FILE_PATTERN"
+
+          output_dir="$RUNNER_TEMP/desktop-plus-custom-release"
+          mkdir -p "$output_dir"
+          asset="desktop-plus-custom-${VERSION}-linux-${ASSET_ARCH}.AppImage"
+          install -m 0755 "$source_image" "$output_dir/$asset"
+
+          extract_dir=$(mktemp -d)
+          (
+            cd "$extract_dir"
+            "$output_dir/$asset" --appimage-extract >/dev/null
+            test -x squashfs-root/desktop-plus-custom
+            file squashfs-root/desktop-plus-custom | grep -F "$FILE_PATTERN"
+          )
+
+          (
+            cd "$output_dir"
+            sha256sum "$asset" >"$asset.sha256"
+          )
+          echo "asset=$output_dir/$asset" >>"$GITHUB_OUTPUT"
+          echo "checksum=$output_dir/$asset.sha256" >>"$GITHUB_OUTPUT"
+
+      - name: Upload architecture assets to the draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
+        run: |
+          gh release upload "$RELEASE_TAG" \
+            "${{ steps.artifact.outputs.asset }}" \
+            "${{ steps.artifact.outputs.checksum }}" \
+            --repo "$GITHUB_REPOSITORY"
+
+  release:
+    name: Publish custom Linux release
+    needs: [prepare, build]
+    runs-on: ubuntu-24.04
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_TAG: ${{ needs.prepare.outputs.tag }}
+
+    steps:
+      - name: Download both architecture assets
+        run: |
+          mkdir release-assets
+          gh release download "$RELEASE_TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --dir release-assets
+
+      - name: Verify release set
+        run: |
+          set -euo pipefail
+          cd release-assets
+          test "$(find . -maxdepth 1 -type f -name '*.AppImage' | wc -l)" -eq 2
+          sha256sum --check ./*.AppImage.sha256
+          sha256sum ./*.AppImage >SHA256SUMS
+          file ./*.AppImage
+
+      - name: Attach combined checksums and publish
+        run: |
+          set -euo pipefail
+          gh release upload "$RELEASE_TAG" release-assets/SHA256SUMS \
+            --repo "$GITHUB_REPOSITORY"
+          gh release edit "$RELEASE_TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --draft=false \
+            --latest
+
+      - name: Publish summary
+        run: |
+          {
+            echo "## Published $RELEASE_TAG"
+            echo
+            echo "Both Linux architectures were built by native GitHub-hosted runners and published from commit \`$GITHUB_SHA\`."
+          } >>"$GITHUB_STEP_SUMMARY"
