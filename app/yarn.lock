@@ -278,9 +278,9 @@
     "@lezer/common" "^1.5.0"
     "@lezer/highlight" "^1.0.0"
 
-"@lezer/php@https://github.com/cyppe/php.git#01e2a892bc14d9a1c7984e077444a3c2108e1a74":
+"@lezer/php@https://github.com/cyppe/php.git#0b386122ec7ba32b545ea88aa56d83fdc945e57c":
   version "1.0.5"
-  resolved "https://github.com/cyppe/php.git#01e2a892bc14d9a1c7984e077444a3c2108e1a74"
+  resolved "https://github.com/cyppe/php.git#0b386122ec7ba32b545ea88aa56d83fdc945e57c"
   dependencies:
     "@lezer/common" "^1.2.0"
     "@lezer/highlight" "^1.0.0"
