@@ -278,9 +278,10 @@
     "@lezer/common" "^1.5.0"
     "@lezer/highlight" "^1.0.0"
 
-"@lezer/php@https://github.com/cyppe/php.git#0b386122ec7ba32b545ea88aa56d83fdc945e57c":
-  version "1.0.5"
-  resolved "https://github.com/cyppe/php.git#0b386122ec7ba32b545ea88aa56d83fdc945e57c"
+"@lezer/php@^1.0.6":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@lezer/php/-/php-1.0.6.tgz#9a5b41f7405e72beec7cb3e511ea4ab9196dfb20"
+  integrity sha512-QJ2xNXPmsm/Z3IpThq8fnJrEIVpxhsIoj6GZBW0JYEd/l9zxpJZW216X4fzqQY4vgpdGIumypvI4uQjd4tnYtw==
   dependencies:
     "@lezer/common" "^1.2.0"
     "@lezer/highlight" "^1.0.0"
