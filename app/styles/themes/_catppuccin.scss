@@ -38,6 +38,16 @@
   --ctp-base: #eff1f5;
   --ctp-mantle: #e6e9ef;
   --ctp-crust: #dce0e8;
+  --ctp-primary-button: #8839ef;
+  --ctp-primary-button-hover: #7c2bd5;
+  --ctp-primary-button-text: #eff1f5;
+  --ctp-disabled-button: #ccd0da;
+  --ctp-disabled-button-border: #bcc0cc;
+  --ctp-disabled-button-text: #4c4f69;
+  --ctp-secondary-readable: #5c5f77;
+  --ctp-muted-readable: #5c5f77;
+  --ctp-line-number: #5c5f77;
+  --ctp-changed-line-number: #4c4f69;
 
   color: var(--text-color);
   background-color: var(--background-color);
@@ -51,13 +61,16 @@
   --color-conflicted: var(--ctp-peach);
 
   --text-color: var(--ctp-text);
-  --text-secondary-color: var(--ctp-subtext0);
-  --text-secondary-color-muted: var(--ctp-overlay1);
+  --text-secondary-color: var(--ctp-secondary-readable);
+  --text-secondary-color-muted: var(--ctp-muted-readable);
   --background-color: var(--ctp-base);
 
-  --button-background: var(--ctp-mauve);
-  --button-hover-background: var(--ctp-pink);
-  --button-text-color: var(--ctp-crust);
+  --button-background: var(--ctp-primary-button);
+  --button-hover-background: var(--ctp-primary-button-hover);
+  --button-text-color: var(--ctp-primary-button-text);
+  --button-disabled-background: var(--ctp-disabled-button);
+  --button-disabled-border-color: var(--ctp-disabled-button-border);
+  --button-disabled-text-color: var(--ctp-disabled-button-text);
   --button-focus-border-color: var(--ctp-lavender);
   --link-button-color: var(--ctp-blue);
   --link-button-hover-color: var(--ctp-sapphire);
@@ -112,7 +125,7 @@
   --top-shadow: linear-gradient(0deg, transparent 0%, rgba(var(--ctp-overlay2-rgb), 0.22) 100%);
   --bottom-shadow: linear-gradient(180deg, transparent 0%, rgba(var(--ctp-overlay2-rgb), 0.22) 100%) 0 100%;
   --box-overflow-shadow-background-two: var(--no-shadow-top), var(--no-shadow-bottom) 0 100%, var(--top-shadow), var(--bottom-shadow);
-  --box-placeholder-color: var(--ctp-overlay1);
+  --box-placeholder-color: var(--ctp-muted-readable);
 
   --co-author-tag-background-color: var(--ctp-mantle);
   --co-author-tag-border-color: var(--ctp-surface1);
@@ -125,7 +138,7 @@
   --toolbar-background-color: var(--ctp-crust);
   --toolbar-border-color: var(--ctp-surface0);
   --toolbar-text-color: var(--ctp-text);
-  --toolbar-text-secondary-color: var(--ctp-subtext0);
+  --toolbar-text-secondary-color: var(--ctp-secondary-readable);
   --toolbar-button-color: var(--ctp-text);
   --toolbar-button-background-color: transparent;
   --toolbar-button-border-color: var(--ctp-surface0);
@@ -185,7 +198,7 @@
   --primary-suggested-action-border-color: rgba(var(--ctp-lavender-rgb), 0.35);
   --suggested-action-icon-color: var(--ctp-lavender);
 
-  // Diff surfaces. Selection uses Overlay2 at 24% opacity as recommended by
+  // Diff surfaces. Selection uses Overlay2 at 20% opacity as recommended by
   // the style guide, leaving Lavender as the precise active indicator.
   --diff-background-color: var(--ctp-base);
   --diff-text-color: var(--ctp-text);
@@ -194,25 +207,26 @@
   --diff-gutter-color: var(--ctp-surface1);
   --diff-gutter-background-color: var(--ctp-mantle);
   --diff-minimap-background-color: var(--ctp-mantle);
-  --diff-line-number-color: var(--ctp-overlay1);
+  --diff-line-number-color: var(--ctp-line-number);
+  --diff-changed-line-number-color: var(--ctp-changed-line-number);
 
   --diff-selected-background-color: rgba(var(--ctp-overlay2-rgb), 0.2);
   --diff-selected-border-color: var(--ctp-lavender);
   --diff-selected-gutter-color: var(--ctp-lavender);
   --diff-selected-text-color: var(--ctp-text);
 
-  --diff-add-background-color: rgba(var(--ctp-green-rgb), 0.14);
+  --diff-add-background-color: rgba(var(--ctp-green-rgb), 0.16);
   --diff-add-border-color: rgba(var(--ctp-green-rgb), 0.38);
   --diff-add-gutter-color: rgba(var(--ctp-green-rgb), 0.62);
   --diff-add-gutter-background-color: rgba(var(--ctp-green-rgb), 0.18);
-  --diff-add-inner-background-color: rgba(var(--ctp-green-rgb), 0.29);
+  --diff-add-inner-background-color: rgba(var(--ctp-green-rgb), 0.24);
   --diff-add-text-color: var(--ctp-text);
 
-  --diff-delete-background-color: rgba(var(--ctp-red-rgb), 0.14);
+  --diff-delete-background-color: rgba(var(--ctp-red-rgb), 0.16);
   --diff-delete-border-color: rgba(var(--ctp-red-rgb), 0.38);
   --diff-delete-gutter-color: rgba(var(--ctp-red-rgb), 0.62);
   --diff-delete-gutter-background-color: rgba(var(--ctp-red-rgb), 0.18);
-  --diff-delete-inner-background-color: rgba(var(--ctp-red-rgb), 0.29);
+  --diff-delete-inner-background-color: rgba(var(--ctp-red-rgb), 0.24);
   --diff-delete-text-color: var(--ctp-text);
 
   --diff-hunk-background-color: var(--ctp-mantle);
@@ -247,7 +261,7 @@
   --syntax-string-color: var(--ctp-green);
   --syntax-qualifier-color: var(--ctp-yellow);
   --syntax-type-color: var(--ctp-yellow);
-  --syntax-comment-color: var(--ctp-overlay1);
+  --syntax-comment-color: var(--ctp-muted-readable);
   --syntax-meta-color: var(--ctp-peach);
   --syntax-tag-color: var(--ctp-teal);
   --syntax-attribute-color: var(--ctp-yellow);
@@ -301,7 +315,7 @@
   --unpushed-branch-color: var(--ctp-yellow);
   --call-to-action-bubble-background-color: var(--ctp-mauve);
   --call-to-action-bubble-border-color: var(--ctp-mauve);
-  --call-to-action-bubble-color: var(--ctp-crust);
+  --call-to-action-bubble-color: var(--ctp-mauve);
   --title-tool-tip-background-color: var(--ctp-mantle);
   --title-tool-tip-shadow: 0 4px 12px rgba(var(--ctp-overlay2-rgb), 0.3);
 
@@ -322,6 +336,17 @@
   .commitGraph-row.focused.selected,
   .changes-list-item.selected {
     box-shadow: inset 3px 0 0 var(--ctp-lavender);
+  }
+
+  // Upstream dims the entire disabled control to 60%, which makes its label
+  // needlessly hard to read. A neutral surface communicates disabled state
+  // while preserving the label at AA contrast.
+  .button-component-primary[aria-disabled='true'],
+  .button-component[type='submit'][aria-disabled='true'] {
+    opacity: 1;
+    color: var(--button-disabled-text-color);
+    background-color: var(--button-disabled-background);
+    border-color: var(--button-disabled-border-color);
   }
 
   #desktop-app-title-bar {
@@ -384,4 +409,14 @@ body.theme-dark #desktop-app-chrome.diff-theme-catppuccin {
   --ctp-base: #1e1e2e;
   --ctp-mantle: #181825;
   --ctp-crust: #11111b;
+  --ctp-primary-button: #5f4a7f;
+  --ctp-primary-button-hover: #654f89;
+  --ctp-primary-button-text: #cdd6f4;
+  --ctp-disabled-button: #313244;
+  --ctp-disabled-button-border: #45475a;
+  --ctp-disabled-button-text: #a6adc8;
+  --ctp-secondary-readable: #a6adc8;
+  --ctp-muted-readable: #9399b2;
+  --ctp-line-number: #7f849c;
+  --ctp-changed-line-number: #a6adc8;
 }

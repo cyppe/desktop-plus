@@ -299,6 +299,7 @@
   color: var(--diff-add-text-color);
 
   .diff-line-number {
+    color: var(--diff-changed-line-number-color, var(--diff-line-number-color));
     border-color: var(--diff-add-border-color);
 
     &:last-child {
@@ -311,6 +312,7 @@
   color: var(--diff-delete-text-color);
 
   .diff-line-number {
+    color: var(--diff-changed-line-number-color, var(--diff-line-number-color));
     border-color: var(--diff-delete-border-color);
 
     &:last-child {

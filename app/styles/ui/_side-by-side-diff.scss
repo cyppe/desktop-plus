@@ -250,6 +250,7 @@
       .line-number {
         background: var(--diff-delete-gutter-background-color);
         border-color: var(--diff-delete-border-color);
+        color: var(--diff-changed-line-number-color, var(--diff-line-number-color));
       }
 
       .selectable {
@@ -276,6 +277,7 @@
       .line-number {
         background: var(--diff-add-gutter-background-color);
         border-color: var(--diff-add-border-color);
+        color: var(--diff-changed-line-number-color, var(--diff-line-number-color));
       }
 
       .selectable {

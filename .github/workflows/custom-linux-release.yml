@@ -125,6 +125,7 @@ jobs:
         run: |
           yarn test:setup
           yarn test:unit \
+            app/test/unit/catppuccin-contrast-test.ts \
             app/test/unit/codemirror-6-highlighting-test.ts \
             app/test/unit/diff-theme-test.ts
 

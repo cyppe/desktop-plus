@@ -84,6 +84,7 @@ repository's Yarn pin wins over any global shim:
 mise exec -- corepack yarn install --frozen-lockfile
 mise exec -- corepack yarn test:setup
 mise exec -- corepack yarn test:unit \
+  app/test/unit/catppuccin-contrast-test.ts \
   app/test/unit/codemirror-6-highlighting-test.ts \
   app/test/unit/diff-theme-test.ts
 mise exec -- corepack yarn lint
