@@ -24,7 +24,7 @@ concurrency:
 jobs:
   prepare:
     name: Prepare draft release
-    if: github.ref == 'refs/heads/custom/catppuccin-codemirror-6'
+    if: github.ref == 'refs/heads/custom/main'
     runs-on: ubuntu-24.04
     outputs:
       tag: ${{ steps.release.outputs.tag }}
@@ -62,10 +62,10 @@ jobs:
           {
             echo "Desktop Plus Custom Linux build from commit \`$GITHUB_SHA\`."
             echo
-            echo "Included private-use changes:"
-            echo "- selectable Catppuccin diff theme, enabled by default"
+            echo "Included custom-fork changes:"
+            echo "- adaptive Catppuccin Latte/Mocha application palette, enabled by default"
             echo "- CodeMirror 6/Lezer diff highlighter"
-            echo "- patched Lezer PHP promoted-property attributes"
+            echo "- released Lezer PHP promoted-property attribute support"
             echo
             echo "Artifacts:"
             echo "- x86-64 AppImage for beefy"
@@ -89,7 +89,7 @@ jobs:
   build:
     name: Build Linux ${{ matrix.asset_arch }}
     needs: prepare
-    if: github.ref == 'refs/heads/custom/catppuccin-codemirror-6'
+    if: github.ref == 'refs/heads/custom/main'
     runs-on: ${{ matrix.runner }}
     timeout-minutes: 75
     strategy:

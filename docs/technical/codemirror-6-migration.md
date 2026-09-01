@@ -191,12 +191,10 @@ Before considering the migration complete:
 | Shell      |  2 ms |   9 ms |  53 ms |
 | Luau       |  3 ms |  28 ms | 259 ms |
 
-## Branch and commit structure
+## Fork integration
 
-1. Keep this audit/design as the first commit on the CM6 feature branch.
-2. Keep dependency, build, and worker changes in one atomic, buildable commit.
-3. Commit tests and documentation with the behavior they verify.
-4. Keep the Catppuccin diff theme on its existing independent branch.
-5. Create the local trial branch from current Desktop Plus `main`, cherry-pick
-   the CM6 and theme commits, then add a final standalone product identity
-   commit. Do not include the obsolete CodeMirror 5 PHP source-mask commit.
+The migration was originally developed independently from the Catppuccin work
+and then composed on a trial branch. It now ships on the long-lived
+`custom/main` product branch. The repository's root `AGENTS.md` documents the
+current branch topology and the controlled upstream-merge process. Do not
+restore the obsolete CodeMirror 5 PHP source-mask commit during future syncs.

@@ -1,0 +1,43 @@
+name: Custom - Audit Upstream
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: Audit upstream merge
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Check out custom history
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Configure upstream remote
+        run:
+          git remote add upstream
+          https://github.com/desktop-plus/desktop-plus.git
+
+      - name: Audit incoming commits and merge conflicts
+        run:
+          ./script/custom/audit-upstream.sh | tee
+          "$RUNNER_TEMP/upstream-audit.txt"
+
+      - name: Publish audit summary
+        if: always()
+        run: |
+          {
+            echo '## Desktop Plus upstream audit'
+            echo
+            echo '```text'
+            if [[ -f "$RUNNER_TEMP/upstream-audit.txt" ]]; then
+              cat "$RUNNER_TEMP/upstream-audit.txt"
+            else
+              echo 'The audit stopped before producing a report. See the job log.'
+            fi
+            echo '```'
+          } >>"$GITHUB_STEP_SUMMARY"
