@@ -411,6 +411,22 @@ export class Appearance extends React.Component<
           onSelectionChanged={this.onSelectedThemeChanged}
           renderRadioButtonLabelContents={this.renderThemeSwatch}
         />
+
+        <Select
+          value={this.state.selectedDiffTheme}
+          label="Application palette"
+          onChange={this.onSelectedDiffThemeChanged}
+        >
+          {availableDiffThemes.map(diffTheme => (
+            <option key={diffTheme} value={diffTheme}>
+              {getDiffThemeLabel(diffTheme)}
+            </option>
+          ))}
+        </Select>
+        <div className="settings-description">
+          Catppuccin applies an adaptive Latte or Mocha palette to the complete
+          interface, including diffs.
+        </div>
       </div>
     )
   }
@@ -614,18 +630,6 @@ export class Appearance extends React.Component<
     return (
       <div className="advanced-section">
         <h2 id="diff-heading">Diff</h2>
-
-        <Select
-          value={this.state.selectedDiffTheme}
-          label="Color theme"
-          onChange={this.onSelectedDiffThemeChanged}
-        >
-          {availableDiffThemes.map(diffTheme => (
-            <option key={diffTheme} value={diffTheme}>
-              {getDiffThemeLabel(diffTheme)}
-            </option>
-          ))}
-        </Select>
 
         <Select
           value={this.state.selectedDiffFontSize.toString()}

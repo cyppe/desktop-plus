@@ -21,10 +21,10 @@ describe('diff theme', () => {
     assert.strictEqual(defaultDiffTheme, catppuccinDiffTheme)
   })
 
-  it('describes the adaptive Catppuccin palette', () => {
+  it('describes the application-wide adaptive Catppuccin palette', () => {
     assert.strictEqual(
       getDiffThemeLabel(catppuccinDiffTheme),
-      'Catppuccin (matches app theme)'
+      'Catppuccin (adaptive)'
     )
   })
 })

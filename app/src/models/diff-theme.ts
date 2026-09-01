@@ -10,8 +10,8 @@ export const availableDiffThemes: ReadonlyArray<DiffTheme> = [
 ]
 
 const diffThemeLabels: Readonly<Record<DiffTheme, string>> = {
-  default: 'Default',
-  catppuccin: 'Catppuccin (matches app theme)',
+  default: 'Desktop Plus default',
+  catppuccin: 'Catppuccin (adaptive)',
 }
 
 export function parseDiffTheme(value: string | null): DiffTheme {
