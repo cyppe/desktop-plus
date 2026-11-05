@@ -169,7 +169,13 @@ import {
   getConfigMigrationResult,
   updateMainProcessConfig,
   showOpenDialog,
+  getPath,
 } from '../../ui/main-process-proxy'
+import {
+  readManagedRepositories,
+  planManagedRepositories,
+} from '../managed-repositories'
+import { addPinnedRepository } from './repository-pinning'
 import {
   API,
   getAccountForEndpoint,
@@ -2970,6 +2976,10 @@ export class AppStore extends TypedBaseStore<IAppState> {
     this.repositories = repositories
 
     this.updateRepositorySelectionAfterRepositoriesChanged()
+
+    this.applyManagedRepositories().catch(e =>
+      log.error('[AppStore] could not apply the managed repository list', e)
+    )
 
     this.sidebarWidth = constrain(
       getNumber(sidebarWidthConfigKey, defaultSidebarWidth)
@@ -9511,6 +9521,72 @@ export class AppStore extends TypedBaseStore<IAppState> {
     }
 
     return addedRepositories
+  }
+
+  /**
+   * Adds, groups and pins the repositories listed in the user data directory's
+   * managed-repositories.json (see managed-repositories.ts). Paths that are not
+   * a repository on disk yet are skipped quietly, so a list kept in dotfiles can
+   * name repositories that are cloned later.
+   */
+  private async applyManagedRepositories(): Promise<void> {
+    const managed = await readManagedRepositories(await getPath('userData'))
+    if (managed === null || managed.length === 0) {
+      return
+    }
+
+    const present = []
+    for (const entry of managed) {
+      const type = await getRepositoryType(entry.path).catch(() => null)
+      if (type !== null && type.kind === 'regular') {
+        present.push({ ...entry, path: type.topLevelWorkingDirectory })
+      }
+    }
+
+    const existing = new Map<string, string | null>()
+    for (const entry of present) {
+      const repository = matchExistingRepository(this.repositories, entry.path)
+      if (repository instanceof Repository) {
+        existing.set(entry.path, repository.groupName)
+      } else if (repository !== undefined) {
+        existing.set(entry.path, null)
+      }
+    }
+
+    const plan = planManagedRepositories(present, existing)
+    if (plan.toAdd.length > 0) {
+      await this._addRepositories(plan.toAdd, null)
+    }
+
+    const all = await this.repositoriesStore.getAll()
+    const find = (path: string) => {
+      const repository = matchExistingRepository(all, path)
+      return repository instanceof Repository ? repository : undefined
+    }
+
+    for (const [groupName, paths] of plan.groups) {
+      const repositories = paths
+        .map(find)
+        .filter((r): r is Repository => r !== undefined)
+      if (repositories.length > 0) {
+        await this._changeRepositoriesGroupName(repositories, groupName)
+      }
+    }
+
+    for (const path of plan.toPin) {
+      const repository = find(path)
+      if (repository !== undefined) {
+        addPinnedRepository(repository)
+      }
+    }
+
+    log.info(
+      `[AppStore] managed repositories: ${present.length} of ${managed.length} on disk, ` +
+        `${plan.toAdd.length} added, ${
+          [...plan.groups.values()].flat().length
+        } grouped, ` +
+        `${plan.toPin.length} pinned`
+    )
   }
 
   public async _relocateRepository(repository: Repository): Promise<void> {
